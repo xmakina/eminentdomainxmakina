@@ -15,7 +15,8 @@
 var SYM_RIGHTARROW = " &rarr; ";
 define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 	// load my own module!!!
-	g_gamethemeurl + "modules/sharedparent.js"], function(dojo, declare) {
+	g_gamethemeurl + "modules/sharedparent.js",
+	g_gamethemeurl + "modules/js/index.js"], function(dojo, declare) {
 		return declare("bgagame.eminentdomainxmakina", bgagame.sharedparent, // parent declared in shared module
 			{
 				constructor: function() {
@@ -38,6 +39,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				 * "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
 				 */
 				setup: function(gamedatas) {
+					main(gamedatas)
 					console.log("Starting game setup", gamedatas);
 					//   dojo.destroy('debug_output');
 					this.inSetup = true;
@@ -1808,7 +1810,6 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							break;
 						case 'e': // trash/remove
 						case 'E':
-							if()
 							console.log({clientStateArgs: this.clientStateArgs})
 							this.setClientStateAction('client_selectCardToRemove');
 							break;

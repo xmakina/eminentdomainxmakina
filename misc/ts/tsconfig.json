@@ -1,0 +1,10 @@
+{
+    "compileOnSave": true,
+    "watchOptions": {
+        "excludeDirectories": ["**/node_modules"]
+    },
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outFile": "../../modules/js/index.js"
+    }
+}
