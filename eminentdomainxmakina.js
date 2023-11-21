@@ -537,7 +537,6 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								break;
 							case 'client_selectCardToRemove':
 								dojo.query(".hand > .card").addClass('active_slot');
-								dojo.addClass(this.clientStateArgs.card, 'active_slot');
 								this.addDoneButton();
 
 								var rules = this.clientStateArgs.unprocessed_choices.replace("!", "");
@@ -552,6 +551,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 									if (!dojo.hasClass(this.clientStateArgs.card, 'toremove') && 
 										!dojo.hasClass(this.clientStateArgs.card, 'permanent') &&
 										!dojo.hasClass(this.clientStateArgs.card, 'planet')) {
+										dojo.addClass(this.clientStateArgs.card, 'active_slot');
 										this.addActionButton('button_self', _("Remove Itself"), dojo.hitch(this, function() {
 											dojo.addClass(this.clientStateArgs.card, 'toremove');
 											this.commitOperationAndSubmit('e', this.clientStateArgs.card);
