@@ -549,7 +549,9 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 									this.setDescriptionOnMyTurn(_('Select up to ${total} card(s) to remove from the game'), {
 										total: total
 									});
-									if (!dojo.hasClass(this.clientStateArgs.card, 'toremove') && !dojo.hasClass(this.clientStateArgs.card, 'permanent')) {
+									if (!dojo.hasClass(this.clientStateArgs.card, 'toremove') && 
+										!dojo.hasClass(this.clientStateArgs.card, 'permanent') &&
+										!dojo.hasClass(this.clientStateArgs.card, 'planet')) {
 										this.addActionButton('button_self', _("Remove Itself"), dojo.hitch(this, function() {
 											dojo.addClass(this.clientStateArgs.card, 'toremove');
 											this.commitOperationAndSubmit('e', this.clientStateArgs.card);
