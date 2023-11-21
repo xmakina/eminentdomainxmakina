@@ -771,6 +771,11 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 
 								} else {
 									this.expandTech(true, ".tech.active_slot:not(.fleet_basic)", "selection_area");
+									this.addActionButton('button_skip', _('Forfeit Technology card, gain Role card only'), (e) => {
+										this.clientStateArgs.choices.push(['x']);
+										this.ajaxClientStateAction();
+										this.expandTech(false);
+									});
 								}
 								if (this.gamedatas.gamestate.args.extra) {
 									this.setMainTitle(this.getTokenName(this.gamedatas.gamestate.args.card) + ":", 'before');
