@@ -15,8 +15,7 @@
 var SYM_RIGHTARROW = " &rarr; ";
 define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 	// load my own module!!!
-	g_gamethemeurl + "modules/sharedparent.js",
-	g_gamethemeurl + "modules/js/index.js"], function(dojo, declare) {
+	g_gamethemeurl + "modules/sharedparent.js"], function(dojo, declare) {
 		return declare("bgagame.eminentdomainxmakina", bgagame.sharedparent, // parent declared in shared module
 			{
 				constructor: function() {
@@ -39,7 +38,6 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				 * "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
 				 */
 				setup: function(gamedatas) {
-					main(gamedatas)
 					console.log("Starting game setup", gamedatas);
 					//   dojo.destroy('debug_output');
 					this.inSetup = true;
@@ -539,7 +537,10 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								break;
 							case 'client_selectCardToRemove':
 								dojo.query(".hand > .card").addClass('active_slot');
-								dojo.addClass(this.clientStateArgs.card, 'active_slot');
+
+								if(dojo.hasClass(this.clientStateArgs.card,'card_role')) {
+									dojo.addClass(this.clientStateArgs.card, 'active_slot');
+								}
 								this.addDoneButton();
 
 								var rules = this.clientStateArgs.unprocessed_choices.replace("!", "");
@@ -551,7 +552,10 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 									this.setDescriptionOnMyTurn(_('Select up to ${total} card(s) to remove from the game'), {
 										total: total
 									});
-									if (!dojo.hasClass(this.clientStateArgs.card, 'toremove') && !dojo.hasClass(this.clientStateArgs.card, 'permanent')) {
+									if (!dojo.hasClass(this.clientStateArgs.card, 'toremove') && 
+										!dojo.hasClass(this.clientStateArgs.card, 'permanent') &&
+										!dojo.hasClass(this.clientStateArgs.card, 'planet')
+										) {
 										this.addActionButton('button_self', _("Remove Itself"), dojo.hitch(this, function() {
 											dojo.addClass(this.clientStateArgs.card, 'toremove');
 											this.commitOperationAndSubmit('e', this.clientStateArgs.card);
@@ -1810,7 +1814,6 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							break;
 						case 'e': // trash/remove
 						case 'E':
-							console.log({clientStateArgs: this.clientStateArgs})
 							this.setClientStateAction('client_selectCardToRemove');
 							break;
 						case 's':
