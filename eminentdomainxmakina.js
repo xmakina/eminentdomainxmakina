@@ -15,10 +15,10 @@
 var SYM_RIGHTARROW = " &rarr; ";
 define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 	// load my own module!!!
-	g_gamethemeurl + "modules/sharedparent.js"], function(dojo, declare) {
+	g_gamethemeurl + "modules/sharedparent.js"], function (dojo, declare) {
 		return declare("bgagame.eminentdomainxmakina", bgagame.sharedparent, // parent declared in shared module
 			{
-				constructor: function() {
+				constructor: function () {
 					console.log('eminentdomainxmakina constructor');
 					g_img_preload = ['cards.jpg', 'board.jpg', 'planets.jpg'];
 
@@ -37,7 +37,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				 * 
 				 * "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
 				 */
-				setup: function(gamedatas) {
+				setup: function (gamedatas) {
 					console.log("Starting game setup", gamedatas);
 					//   dojo.destroy('debug_output');
 					this.inSetup = true;
@@ -55,18 +55,18 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 
 					this.updateEndOfGameMessage(gamedatas);
-	
+
 
 					if (!this.isReadOnly()) {
 						this.checkPreferencesConsistency(this.gamedatas.server_prefs);
 					}
-					
+
 					this.setupPreference();
 
 					console.log("Ending game setup");
 				},
-				
-				checkPreferencesConsistency: function(backPrefs) {
+
+				checkPreferencesConsistency: function (backPrefs) {
 					//console.log('check pref',backPrefs,this.prefs);
 					for (var key in backPrefs) {
 						let value = backPrefs[key];
@@ -76,12 +76,12 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							var args = { pref: pref, value: user_value, player: this.player_id };
 							backPrefs[key] = user_value;
 							this.ajaxcall("/" + this.game_name + "/" + this.game_name + "/" + 'changePreference' + ".html", args,// 
-								this, () => {}, (err, res) => { if (err) console.error("changePreference callback failed " + res); else console.log("changePreference sent " + pref + "=" + user_value); });
+								this, () => { }, (err, res) => { if (err) console.error("changePreference callback failed " + res); else console.log("changePreference sent " + pref + "=" + user_value); });
 
 						}
 					}
 				},
-				setupPreference: function() {
+				setupPreference: function () {
 					// Extract the ID and value from the UI control
 					var _this = this;
 					function onchange(e) {
@@ -101,7 +101,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					dojo.query("#ingame_menu_content .preference_control").forEach((el) => onchange({ target: el }));
 				},
 
-				onPreferenceChange: function(prefId, prefValue) {
+				onPreferenceChange: function (prefId, prefValue) {
 					console.log("Preference changed", prefId, prefValue);
 
 					if (!this.isReadOnly()) {
@@ -110,7 +110,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				},
 
 
-				updateEndOfGameMessage: function(args) {
+				updateEndOfGameMessage: function (args) {
 					var endmessage = _('End of game is triggered.');
 					endmessage += " ";
 					if (this.gamedatas.variants.extra_turn_variant_on) {
@@ -138,7 +138,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 				},
 
-				setupGameTokens: function() {
+				setupGameTokens: function () {
 					if (!this.isSpectator) {
 						this.drawHandIcon(5, 'hand_icon', this.player_color, -2);
 					}
@@ -151,17 +151,17 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						}
 						this.placeTokenWithTips(token);
 					}
-					dojo.query(".counter,.slot_tooltip").forEach(dojo.hitch(this, function(node) {
+					dojo.query(".counter,.slot_tooltip").forEach(dojo.hitch(this, function (node) {
 						this.updateTooltip(node.id);
 					}));
 					this.connectClass('card_bottom', 'onclick', 'onCard');
 					this.connectClass('supply_tech', 'onclick', 'onCard');
 					this.connectClass('discard', 'onclick', 'onDiscard');
 					this.connect($('discard_planets'), 'onclick', 'onDiscard');
-					
-					                    // Labels
-                    $('deck_display').setAttribute('data-title', _('Deck'));
-                    $('discard_display').setAttribute('data-title', _('Discard'));
+
+					// Labels
+					$('deck_display').setAttribute('data-title', _('Deck'));
+					$('discard_display').setAttribute('data-title', _('Discard'));
 
 					this.connectClass('gslider', 'oninput', 'onSlider');
 					this.connectClass('gcheckbox', 'oninput', 'onCheckbox');
@@ -169,7 +169,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					console.log("enging token setup");
 					//dojo.place(this.getJemImg('green'),'bboard');
 				},
-				setupPlayer: function(player_id, playerInfo) {
+				setupPlayer: function (player_id, playerInfo) {
 					// console.log("player info " + player_id, playerInfo);
 					var color = playerInfo.color;
 					var playerBoardDiv = dojo.byId('player_board_' + player_id);
@@ -187,14 +187,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						dojo.connect($('deck_' + color), "onclick", this, "onDeck");
 						dojo.style($('deck_' + color), 'cursor', 'pointer');
 					}
-					$('setaside_'+color).setAttribute('data-title', _('Set Aside Zone'));
+					$('setaside_' + color).setAttribute('data-title', _('Set Aside Zone'));
 				},
 				// /////////////////////////////////////////////////
 				// // Game & client states
 				// onEnteringState: this method is called each time we are entering into a new game state.
 				// You can use this method to perform some user interface changes at this moment.
 				//
-				onEnteringState: function(stateName, args) {
+				onEnteringState: function (stateName, args) {
 					console.log('Entering state: ' + stateName, args);
 
 					this.curstate = stateName;
@@ -212,6 +212,10 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						}
 
 						switch (stateName) {
+							case 'scenarioSelection':
+								this.clientStateArgs.action = 'selectScenario';
+								this.expandScenario();
+								break;
 							case 'playerTurnAction':
 								this.clientStateArgs.action = 'playAction';
 								var color = this.getPlayerColor(this.getActivePlayerId());
@@ -227,8 +231,6 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 
 								break;
 							case 'playerTurnRole':
-
-
 								this.clientStateArgs.action = 'playRole';
 								var color = this.getPlayerColor(this.getActivePlayerId());
 								this.updatePermCounters(color, args.args.perm_boost_num);
@@ -248,7 +250,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								this.clientStateArgs.action = 'playPick';
 								break;
 							case 'playerTurnRoleExtra':
-							    if (!this.isCurrentPlayerActive())
+								if (!this.isCurrentPlayerActive())
 									break;
 								this.clientStateArgs.action = 'playExtra';
 								if (this.instantaneousMode) {
@@ -280,7 +282,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								if (args.args.survey) { //survey select card
 									this.clientStateArgs.action = 'playPick';
 									this.clientStateArgs.nocancel = true;
-									this.setClientStateAction('client_playerTurnSurvey',this.gamedatas.gamestate.descriptionmyturn, 0);
+									this.setClientStateAction('client_playerTurnSurvey', this.gamedatas.gamestate.descriptionmyturn, 0);
 									break;
 								}
 
@@ -321,7 +323,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				// onLeavingState: this method is called each time we are leaving a game state.
 				// You can use this method to perform some user interface changes at this moment.
 				//
-				onLeavingState: function(stateName) {
+				onLeavingState: function (stateName) {
 					console.log('Leaving state: ' + stateName);
 					//console.log('-- cargs: ' + stateName,  this.clientStateArgs);
 					dojo.query(".active_slot").removeClass('active_slot');
@@ -332,24 +334,24 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					//this.expandTech(false);
 				},
 
-				onUpdateActionButtons_playerTurnRole: function(args) {
+				onUpdateActionButtons_playerTurnRole: function (args) {
 					dojo.query(".board  .card_role:last-child").addClass('active_slot');
 					dojo.query(".tableau_" + this.player_color + " .tech.state_1.activatable").addClass('active_slot');
-					this.addImageActionButton('button_warfare', this.createDiv("icon warfare role"), dojo.hitch(this, function() {
+					this.addImageActionButton('button_warfare', this.createDiv("icon warfare role"), dojo.hitch(this, function () {
 						this.clientStateArgs.role = 'W';
 						this.clientStateArgs.card = this.getRoleCard('warfare');
 						if (!this.clientStateArgs.card.startsWith("x_"))
 							this.placeTokenLocal(this.clientStateArgs.card, 'setaside_' + this.player_color, 12);
 						this.setClientStateAction('client_selectBoostOrLeader');
 					}));
-					this.addImageActionButton('button_colonize', this.createDiv("icon colonize role"), dojo.hitch(this, function() {
+					this.addImageActionButton('button_colonize', this.createDiv("icon colonize role"), dojo.hitch(this, function () {
 						this.clientStateArgs.role = 'C';
 						this.clientStateArgs.card = this.getRoleCard('colonize');
 						if (!this.clientStateArgs.card.startsWith("x_"))
 							this.placeTokenLocal(this.clientStateArgs.card, 'setaside_' + this.player_color, 12);
 						this.setClientStateAction('client_selectBoostOrLeader');
 					}));
-					this.addImageActionButton('button_survey', this.createDiv("icon survey role"), dojo.hitch(this, function() {
+					this.addImageActionButton('button_survey', this.createDiv("icon survey role"), dojo.hitch(this, function () {
 						this.clientStateArgs.role = 'S';
 						this.clientStateArgs.card = this.getRoleCard('survey');
 						if (!this.clientStateArgs.card.startsWith("x_"))
@@ -357,7 +359,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						this.setClientStateAction('client_selectBoost');
 					}));
 					if (!this.gamedatas.variants.learning_variant_on) {
-						this.addImageActionButton('button_research', this.createDiv("icon research role"), dojo.hitch(this, function() {
+						this.addImageActionButton('button_research', this.createDiv("icon research role"), dojo.hitch(this, function () {
 							this.clientStateArgs.role = 'R';
 							this.clientStateArgs.card = this.getRoleCard('research');
 							if (!this.clientStateArgs.card.startsWith("x_"))
@@ -365,14 +367,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							this.setClientStateAction('client_selectBoost');
 						}));
 					}
-					this.addImageActionButton('button_produce', this.createDiv("icon produce role"), dojo.hitch(this, function() {
+					this.addImageActionButton('button_produce', this.createDiv("icon produce role"), dojo.hitch(this, function () {
 						this.clientStateArgs.role = 'P';
 						this.clientStateArgs.card = this.getRoleCard('produce');
 						if (!this.clientStateArgs.card.startsWith("x_"))
 							this.placeTokenLocal(this.clientStateArgs.card, 'setaside_' + this.player_color, 12);
 						this.setClientStateAction('client_selectBoost');
 					}));
-					this.addImageActionButton('button_trade', this.createDiv("icon trade role"), dojo.hitch(this, function() {
+					this.addImageActionButton('button_trade', this.createDiv("icon trade role"), dojo.hitch(this, function () {
 						this.clientStateArgs.role = 'T';
 						this.clientStateArgs.card = this.getRoleCard('produce');
 						if (!this.clientStateArgs.card.startsWith("x_"))
@@ -385,7 +387,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				// onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
 				// action status bar (ie: the HTML links in the status bar).
 				//        
-				onUpdateActionButtons: function(stateName, args) {
+				onUpdateActionButtons: function (stateName, args) {
 					//console.log('onUpdateActionButtons: ' + stateName, args);
 					if (this.curstate != stateName) {		// delay firing this
 						this.pendingUpdate = true;
@@ -441,9 +443,9 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								};
 								if (stateName == 'playerTurnPreDiscard') {
 									this.addActionButton('button_wait', _("Wait"), () => this.ajaxClientStateAction('playWait'));
-									this.addTooltip('button_wait', 
-									     _("Now you can discard cards instead of waiting until end of turn. If you do your turn will end automatically."),
-										 _("Click Wait to skip discarding now and do it after after player done following"), 1000);
+									this.addTooltip('button_wait',
+										_("Now you can discard cards instead of waiting until end of turn. If you do your turn will end automatically."),
+										_("Click Wait to skip discarding now and do it after after player done following"), 1000);
 								}
 
 								break;
@@ -453,7 +455,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								dojo.query(".hand > .card_planet").addClass('active_slot');
 								break;
 							case 'playerTurnGameEnd':
-								this.addActionButton('button_skip', _("End Game"), dojo.hitch(this, function() {
+								this.addActionButton('button_skip', _("End Game"), dojo.hitch(this, function () {
 									this.ajaxClientStateAction('skipAction');
 								}));
 								break;
@@ -489,7 +491,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 											as_role = 'P';
 										}
 										if (as_role) {
-									
+
 											var div = this.createDiv("icon role " + as_role);
 											this.addImageActionButton('button_follow2', _("Follow as ") + " " + div, () => {
 												this.clientStateArgs.role = as_role;
@@ -509,17 +511,17 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 										this.ajaxClientStateAction('playWait');
 									}, 'red', tip);
 								}
-								this.addActionButton('button_dissent', _("Dissent"), dojo.hitch(this, function() {
+								this.addActionButton('button_dissent', _("Dissent"), dojo.hitch(this, function () {
 									this.ajaxClientStateAction('playDissent');
 								}));
 								if (this.prefs[150].value == 2) { // auto dissent with timer
 									if (args.pinfo[this.player_id].can_follow == false) {
-										var timeout = parseInt( Math.random()*10)+10; 
+										var timeout = parseInt(Math.random() * 10) + 10;
 										this.addButtonTimer('button_dissent', undefined, timeout);
 									}
 								}
 								if (args.active_follower != this.player_id) {
-									this.addActionButton('button_wait', _("Wait"), dojo.hitch(this, function() {
+									this.addActionButton('button_wait', _("Wait"), dojo.hitch(this, function () {
 										this.ajaxClientStateAction('playWait');
 									}));
 
@@ -548,11 +550,11 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 									this.setDescriptionOnMyTurn(_('Select up to ${total} card(s) to remove from the game'), {
 										total: total
 									});
-									if (!dojo.hasClass(this.clientStateArgs.card, 'toremove') && 
+									if (!dojo.hasClass(this.clientStateArgs.card, 'toremove') &&
 										!dojo.hasClass(this.clientStateArgs.card, 'permanent') &&
 										!dojo.hasClass(this.clientStateArgs.card, 'planet')) {
 										dojo.addClass(this.clientStateArgs.card, 'active_slot');
-										this.addActionButton('button_self', _("Remove Itself"), dojo.hitch(this, function() {
+										this.addActionButton('button_self', _("Remove Itself"), dojo.hitch(this, function () {
 											dojo.addClass(this.clientStateArgs.card, 'toremove');
 											this.commitOperationAndSubmit('e', this.clientStateArgs.card);
 										}));
@@ -587,7 +589,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								break;
 							case 'client_selectResourceToTrade':
 								// resource on planet and cards
-								var ress=dojo.query(".tableau_" + this.player_color + " .resource.state_2");
+								var ress = dojo.query(".tableau_" + this.player_color + " .resource.state_2");
 								ress.addClass('active_slot');
 
 								// weapon emporium
@@ -603,7 +605,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								this.setDescriptionOnMyTurn(_('Select a resource to trade: ${boost_count} left'), {
 									boost_count: this.clientStateArgs.unprocessed_choices.length
 								});
-								
+
 								if (ress.length > 0)
 									this.addActionButton('random', _('All Random'), () => {
 										// produce on random planets
@@ -621,7 +623,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 										}
 										this.actionPromptAndCommit();
 									});
-								
+
 
 								this.addDoneButton();
 								break;
@@ -697,16 +699,16 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								if (this.clientStateArgs.action == 'playAction') {
 									var rule = this.clientStateArgs.unprocessed_choices[0];
 									var message = _('${You} may select planet to settle or add colonies');
-								
+
 									switch (rule) {
 										//.
 										case 's': // settle or +1 colony
 											this.addActionButton('button_settle', _("Settle 1 Planet"), dojo.hitch(this,
-												function() {
+												function () {
 													this.setClientStateAction('client_selectFaceDownPlanetSettleOnly');
 												}));
 											this.addImageActionButton('button_colony', _("+1 Colony ") + this.createDiv("icon colonize"), dojo.hitch(this,
-												function() {
+												function () {
 													this.clientStateArgs.unprocessed_choices = "c";
 													this.setClientStateAction('client_selectFaceDownPlanetColonize',
 														_('Select a planet to add a colony'));
@@ -715,7 +717,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 										case 'S':// settle or skip
 											var message = _('${You} may select planet to settle or skip');
 											this.addActionButton('button_skip', _("Skip Settle"), dojo.hitch(this,
-												function() {
+												function () {
 													this.commitOperationAndSubmit('S', "skip");
 												}));
 											break;
@@ -734,7 +736,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								if (this.gamedatas.gamestate.args.extra) {
 									totalResearch = args.boost_rem;
 								}
-								
+
 								var techs = this.gamedatas.gamestate.args.tech;
 								var settledTypes = 0;
 
@@ -801,14 +803,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								switch (laction) {
 									case 'a':
 									case 'W':
-										this.addActionButton('button_attack', "<span class='yellow'>Leader:</span> Attack 1 Planet", dojo.hitch(this, function() {
+										this.addActionButton('button_attack', "<span class='yellow'>Leader:</span> Attack 1 Planet", dojo.hitch(this, function () {
 											this.clientStateArgs.unprocessed_choices = 'a';
 											this.setClientStateAction('client_selectActionAttack');
 										}));
 										break;
 									case 's':
 									case 'C':
-										this.addActionButton('button_settle', "<span class='yellow'>Leader:</span> Settle 1 Planet", dojo.hitch(this, function() {
+										this.addActionButton('button_settle', "<span class='yellow'>Leader:</span> Settle 1 Planet", dojo.hitch(this, function () {
 											this.clientStateArgs.unprocessed_choices = 's';
 											this.setClientStateAction('client_selectFaceDownPlanetSettleOnly');
 										}));
@@ -817,11 +819,11 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 										if (info != null && info.r == 'P/T') {
 											this.setDescriptionOnMyTurn(_('${You} must select between produce and trade'));
 											this.addImageActionButton('button_produce', this.createDiv("icon produce"), dojo.hitch(this,
-												function() {
+												function () {
 													this.clientStateArgs.role = 'P';
 													this.setClientStateAction('client_selectBoost');
 												}));
-											this.addImageActionButton('button_trade', this.createDiv("icon trade"), dojo.hitch(this, function() {
+											this.addImageActionButton('button_trade', this.createDiv("icon trade"), dojo.hitch(this, function () {
 												this.clientStateArgs.role = 'T';
 												this.setClientStateAction('client_selectBoost');
 											}));
@@ -876,15 +878,15 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 									messagex = '${icon}${icon}${icon}';
 								else if (total == 4)
 									messagex = '${icon}${icon}${icon}${icon}';
-								if (possible_boost) 
-									messagex += ' '+('(unused boost ${remaining_boost})');
-					
+								if (possible_boost)
+									messagex += ' ' + ('(unused boost ${remaining_boost})');
+
 								var icondiv = this.format_string_recursive(messagex, {
 									icon: this.createDiv("icon " + this.clientStateArgs.role),
 									total: total,
 									remaining_boost: possible_boost
 								});
-								args.possible_boost=possible_boost;
+								args.possible_boost = possible_boost;
 								if (this.clientStateArgs.role == 'S') {
 									var thorough_survery = this.playerHasOnTableau('card_tech_E_24')
 									var lookup = total - 1;
@@ -893,20 +895,20 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 
 
 									if (thorough_survery && lookup - 2 >= 2) {
-										var div = _("Execute with Thorough Survey ") + " " +  icondiv;
+										var div = _("Execute with Thorough Survey ") + " " + icondiv;
 										var but = this.addImageActionButton('button_done_' + total + "_ts", div, 'onExecuteRole', 'blue');
-									    var ll=lookup-2;
+										var ll = lookup - 2;
 										this.addTooltip(but.id, _('Draw') + " " + ll + " - " + _('Keep 2'), '', 1000);
 									}
-									var div = _("Execute Role ") + " " +  icondiv;
+									var div = _("Execute Role ") + " " + icondiv;
 									var col = 'blue';
 									if (lookup <= 0) col = 'red';
 									var but = this.addImageActionButton('button_done_' + total, div, 'onExecuteRole', col);
-									this.addTooltip(but, _('Draw') + " " + lookup + " - "+_('Keep 1'), '',1000);
-					
+									this.addTooltip(but, _('Draw') + " " + lookup + " - " + _('Keep 1'), '', 1000);
+
 
 								} else if (this.clientStateArgs.role != 'P/T') {
-									var div = _("Execute Role ") + " " +  icondiv;
+									var div = _("Execute Role ") + " " + icondiv;
 									this.addImageActionButton('button_done_' + total, div, 'onExecuteRole', 'blue');
 								}
 								break;
@@ -953,7 +955,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				 * Here, you can defines some utility methods that you can use everywhere in your javascript script.
 				 * 
 				 */
-				getPlaceRedirect: function(token, tokenInfo) {
+				getPlaceRedirect: function (token, tokenInfo) {
 					if (!tokenInfo) {
 						return {
 							location: 'dev_null',
@@ -981,14 +983,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					} else if (location.startsWith('tableau') && token.startsWith('card')) {
 						// result.location = token + "_group";
 						result.createOn = location;
-						
-						var color=getPart(location,1);
-						var sep='';
+
+						var color = getPart(location, 1);
+						var sep = '';
 						if (token.startsWith('scenario')) {
-							 sep = "sep_scenario_"+color;
+							sep = "sep_scenario_" + color;
 						} else {
 							var cardtype = getPart(token, 1);
-							if (cardtype == 'planet' ) {
+							if (cardtype == 'planet') {
 								if (tokenInfo.state == 0)
 									cardtype += '0';
 								else {
@@ -1006,7 +1008,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						}
 					} else if (location.startsWith('tableau') && token.startsWith('fighter')) {
 						var type = getPart(token, 1);
-						if (type=='j1') type='F';
+						if (type == 'j1') type = 'F';
 						result.location = 'tableau_fighter_' + type + "_" + getPart(location, 1);
 						result.createOn = 'stock_fighter';
 					} else if (token.startsWith('scenario')) {
@@ -1051,20 +1053,20 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return result;
 				},
-				getJemImg: function(colorId) {
+				getJemImg: function (colorId) {
 					var jem = "<img class='imgtext' src='" + g_themeurl + "img/mainsite/status-" + colorId + ".png' alt='" + colorId + "' />";
 					return jem;
 				},
 				/** @override */
-				change3d: function(xaxis, xpos, ypos, zaxis, scale, enable3d, clear3d) {
+				change3d: function (xaxis, xpos, ypos, zaxis, scale, enable3d, clear3d) {
 					this.inherited(arguments);
 					this.adjust3D();
 				},
-				adjust3D: function(e) {
+				adjust3D: function (e) {
 					if (this.isSpectator) return;
 					var hand = 'hand_area';
 
-					setTimeout(dojo.hitch(this, function() {
+					setTimeout(dojo.hitch(this, function () {
 						var control3dmode3d = this.control3dmode3d;
 						//console.log("3d mode: " + control3dmode3d);
 						if (control3dmode3d) {
@@ -1082,7 +1084,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				 * @param {*} player_color 
 				 * @param {*} off 
 				 */
-				drawHandIcon: function(num, place, player_color, off) {
+				drawHandIcon: function (num, place, player_color, off) {
 					if (typeof off == 'undefined') off = -1;
 					for (var i = 0; i < num; i++) {
 						var deg = (i + off) * 20;
@@ -1090,13 +1092,13 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							';transform-origin: bottom center;transform: rotate(' + deg + 'deg)"></div>', place);
 					}
 				},
-				cancelLocalStateEffects: function() {
+				cancelLocalStateEffects: function () {
 					this.inherited(arguments);
 					this.expandTech(false);
 					dojo.query('.claimed').removeClass('claimed');
 					dojo.query('.thething .expanded').removeClass('expanded');
 				},
-				setClientStateCustom: function(state, descr, args, onHandlers) {
+				setClientStateCustom: function (state, descr, args, onHandlers) {
 
 					if (onHandlers) {
 						for (var met in onHandlers) {
@@ -1107,7 +1109,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					this.setClientStateAction(state, descr, 0, args);
 				},
 
-				shuffleArray: function(array) {
+				shuffleArray: function (array) {
 					//https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 					for (let i = array.length - 1; i > 0; i--) {
 						const j = Math.floor(Math.random() * (i + 1));
@@ -1116,7 +1118,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				},
 
 				/** @Override */
-				format_string_recursive: function(log, args) {
+				format_string_recursive: function (log, args) {
 					try {
 						//console.trace("format_string_recursive(" + log + ")", args);
 						if (args.log_others !== undefined && this.player_id != args.player_id) {
@@ -1139,7 +1141,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								if (typeof args[key] != 'undefined') {
 									if (key == 'token_divs' || key == 'token_div') {
 										var list = args[key].split(",");
-											var res = "";
+										var res = "";
 										for (var l = 0; l < list.length; l++) {
 											var name = this.getTokenDivForLogValue('token_div', list[l]);
 											res += name + " ";
@@ -1174,10 +1176,10 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return this.inherited(arguments);
 				},
-				getTokenDivForLogValue: function(key, value) {
+				getTokenDivForLogValue: function (key, value) {
 					// ... implement whatever html you want here
 					var token_id = value;
-					if (value===undefined) {
+					if (value === undefined) {
 						console.trace(key);
 					}
 					if (token_id == null) { return "? " + key; }
@@ -1202,7 +1204,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return this.divInlineToken(token_id);
 				},
-				updateDisplayInfo: function(info) {
+				updateDisplayInfo: function (info) {
 					var tt = getFirstParts(info.key, 2);
 					//					console.log(tt, info.tokenKey);
 					switch (tt) {
@@ -1225,7 +1227,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								args.icons = this.getTr('None');
 							}
 
-							var resources = info.slots ? info.slots: '';
+							var resources = info.slots ? info.slots : '';
 							if (resources) {
 								resource_names = [];
 								for (j = 0; j < resources.length; j++) {
@@ -1293,7 +1295,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 
 							// add icons for html
 							var cost = info['b']; // research cost
-							var icons = info.i ? info.i: ''; // icons
+							var icons = info.i ? info.i : ''; // icons
 							if (info.h)
 								icons += 'h';
 
@@ -1369,10 +1371,10 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								info.tooltip += " ";
 								var flip = info.flip;
 								var reverseInfo = this.gamedatas.token_types[flip];
-								info.tooltip += this.getTr(reverseInfo.name); 
+								info.tooltip += this.getTr(reverseInfo.name);
 								info.tooltip += "<br>";
 								// add type
-								info.type += " side_"+info.side;
+								info.type += " side_" + info.side;
 							}
 
 							break;
@@ -1382,7 +1384,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								info.tooltip += this.createSpanHtml(_('Reverse Side:'), 'yellow');
 								info.tooltip += "<br>";
 								var reverseInfo = this.getTokenDisplayInfo('card_fleet_i');
-								info.tooltip += this.getTr(reverseInfo.name); 
+								info.tooltip += this.getTr(reverseInfo.name);
 								info.tooltip += "<p>";
 								info.tooltip += this.getTr(reverseInfo.tooltip);
 							}
@@ -1401,7 +1403,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						info.tooltip += "</i>";
 					}
 				},
-				getTooptipHtmlForTokenInfo: function(tokenInfo) {
+				getTooptipHtmlForTokenInfo: function (tokenInfo) {
 					var main = this.getTooptipHtml(tokenInfo.name, tokenInfo.tooltip, tokenInfo.imageTypes, "<hr/>");
 					var token = tokenInfo.tokenKey;
 					// see also updateDisplayInfo where main tooltip build is going
@@ -1425,7 +1427,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return main;
 				},
-				showPlanetBackTooltip: function(token) {
+				showPlanetBackTooltip: function (token) {
 					var node = $(token);
 					var parentNode = node.parentNode;
 					if (dojo.hasClass(node, "state_0")) {
@@ -1434,7 +1436,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return false;
 				},
-				strRepeat: function(comm, multiplier) {
+				strRepeat: function (comm, multiplier) {
 					if (multiplier === undefined)
 						multiplier = 1;
 					if (multiplier == 1) return comm;
@@ -1444,7 +1446,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return res;
 				},
-				prependOperation: function(comm, multiplier) {
+				prependOperation: function (comm, multiplier) {
 					var rules = this.strRepeat(comm, multiplier);
 					var subrules = rules.split('/');
 					if (subrules.length <= 1) {
@@ -1461,7 +1463,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					return this.clientStateArgs.unprocessed_choices;
 				},
 
-				consumeOperation: function(op) {
+				consumeOperation: function (op) {
 					var rules = this.clientStateArgs.unprocessed_choices;
 					if (!rules) return false;
 					var subrules = rules.split('/');
@@ -1478,7 +1480,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					this.clientStateArgs.unprocessed_choices = subrules_new.join("/");
 					return true;
 				},
-				commitOperation: function(ops, id, extra1, extra2) {
+				commitOperation: function (ops, id, extra1, extra2) {
 					if (id === undefined)
 						id = 'x';
 					var operation = [ops, id];
@@ -1501,7 +1503,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					return false;
 				},
 
-				commitOperationAndSubmit: function(ops, id, extra, animation_handler) {
+				commitOperationAndSubmit: function (ops, id, extra, animation_handler) {
 					if (this.commitOperation(ops, id, extra)) {
 						if (animation_handler !== undefined)
 							animation_handler();
@@ -1510,7 +1512,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return false;
 				},
-				commitOperationAndAction: function(ops, id, extra, animation_handler) {
+				commitOperationAndAction: function (ops, id, extra, animation_handler) {
 					if (this.commitOperation(ops, id, extra)) {
 						if (animation_handler !== undefined)
 							animation_handler();
@@ -1518,24 +1520,24 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return false;
 				},
-				showMoveUnauthorized: function() {
+				showMoveUnauthorized: function () {
 					console.error("This move is not authorized now");
 					console.trace("trace");
 					this.showMessage(__("lang_mainsite", "This move is not authorized now"), "error");
 				},
-				addCancelButton: function() {
+				addCancelButton: function () {
 					if (!$('button_cancel')) {
 						this.addActionButton('button_cancel', _('Cancel'), () => this.cancelLocalStateEffects(), null, null, 'red');
 					}
 				},
-				addDoneButton: function(text) {
+				addDoneButton: function (text) {
 					if ($('button_done')) {
 						dojo.destroy('button_done');
 					}
 					if (typeof text == 'undefined') text = _("Done");
 					var cs = this.clientStateArgs.unprocessed_choices;
 
-					this.addActionButton('button_done', text, dojo.hitch(this, function() {
+					this.addActionButton('button_done', text, dojo.hitch(this, function () {
 						var command = this.clientStateArgs.unprocessed_choices[0];
 						if (command == '!' || command == '>' || !command) {
 							this.ajaxClientStateAction();
@@ -1553,7 +1555,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						dojo.addClass('button_done', 'blinking');
 					}
 				},
-				zeroBoostPrompt: function(leader) {
+				zeroBoostPrompt: function (leader) {
 					var message;
 					if (leader) message = _('You have no boost or not enough boost, this will only gain you a role card. Proceed?');
 					else message = _('You have no boost or not enough boost, that will be no-op. Proceed?');
@@ -1562,11 +1564,11 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						() => this.ajaxClientStateAction()
 					);
 				},
-				createDivFromInfo: function(type, id, extra, classes) {
+				createDivFromInfo: function (type, id, extra, classes) {
 					var info = this.getTokenDisplayInfo(type);
-					return this.createDiv(info.imageTypes + " " + (classes ? classes: ''), id, extra);
+					return this.createDiv(info.imageTypes + " " + (classes ? classes : ''), id, extra);
 				},
-				createActionVisuals: function(rules) {
+				createActionVisuals: function (rules) {
 					var res = "";
 					for (var i = 0; i < rules.length; i++) {
 						var command = rules[i];
@@ -1617,7 +1619,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return res;
 				},
-				canPay: function(action_rules) {
+				canPay: function (action_rules) {
 					var reqs = action_rules.split('>', 2);
 					if (reqs.length > 1) {
 						var paycost = reqs[0];
@@ -1627,7 +1629,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return true;
 				},
-				payAll: function(rules) {
+				payAll: function (rules) {
 					var same = 1;
 					for (var i = 0; i < rules.length; i++) {
 						var command = rules[i];
@@ -1644,7 +1646,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return rules.length;
 				},
-				payOne: function(rule, showError, num) {
+				payOne: function (rule, showError, num) {
 					if (!num) num = 1;
 					var querys;
 					var queryc;
@@ -1667,7 +1669,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						case 'F':
 						case 'D':
 						case 'B':
-				
+
 							var querys = this.queryIds("#tableau_fighter_" + rule + "_" + this.player_color + " > *:not(.claimed)");
 							var queryc = this.queryIds("#hand_" + this.player_color + " > .as_fighter_" + rule + ":not(.claimed)");
 							var queryr = this.queryIds("#tableau_" + this.player_color + " > .has_rslots > .fighter_" + rule + ":not(.claimed)");
@@ -1678,8 +1680,8 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								if (icons)
 									hand_icons_count += (icons.split(rule).length - 1);
 							}
-							
-				
+
+
 							var total = querys.length + hand_icons_count + queryr.length;
 							if (!showError) {
 								return total >= num;
@@ -1689,7 +1691,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								return null;
 							}
 							var custom = queryc.length;
-						
+
 
 							var res = queryc;
 							if (queryr.length >= 1) {
@@ -1698,7 +1700,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								res.push(querys[0]);
 							}
 							//console.log("pay rule select", res);
-							
+
 							if (res.length == 1 && custom == 0) {
 								var payment = res[0];
 								dojo.addClass(payment, 'claimed');
@@ -1712,23 +1714,23 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 
 
 				},
-				playerHasOnTableau: function(card, state) {
+				playerHasOnTableau: function (card, state) {
 					if (state !== undefined) {
 						if (dojo.hasClass(card, "state_" + state))
 							return false;
 					}
 					return this.getFirstChild(".tableau_" + this.player_color + "> #" + card);
 				},
-				playerHas: function(query) {
+				playerHas: function (query) {
 					return this.getFirstChild(".tableau_" + this.player_color + "> " + query);
 				},
-				getFirstChild: function(q, x) {
+				getFirstChild: function (q, x) {
 					var res = dojo.query(q);
 					if (res.length == 0) return x;
 					return res[0].id;
 				},
 
-				ajaxClientStateAction: function(action) {
+				ajaxClientStateAction: function (action) {
 					// massage data
 					delete this.clientStateArgs.unprocessed_choices;
 					this.clientStateArgs.choices_js = JSON.stringify(this.clientStateArgs.choices),
@@ -1736,14 +1738,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					this.inherited(arguments);
 				},
 
-				actionPromptAndCommit: function() {
+				actionPromptAndCommit: function () {
 					var auto = this.actionPrompt();
 					if (auto) {
 						this.ajaxClientStateAction();
 					}
 					return false;
 				},
-				actionPrompt: function() {
+				actionPrompt: function () {
 					//debugger;
 					if (this.clientStateArgs.unprocessed_choices === undefined) {
 						this.showError("Bad state - no action");
@@ -1757,8 +1759,8 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					if (subactions.length > 1) {
 						// multiple choice
 						dojo.empty('generalactions');
-						
-					
+
+
 						var pay = false;
 						for (var i = 0; i < subactions.length; i++) {
 							var sub = subactions[i];
@@ -1796,9 +1798,9 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							this.addCancelButton();
 
 						return false;
-					} 
-						
-					
+					}
+
+
 					this.clientStateArgs.actnum = 0;
 
 					var reqs = rules.split('>', 2);
@@ -1808,7 +1810,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 
 					var command = this.clientStateArgs.unprocessed_choices[0];
 					var lookup = this.clientStateArgs.unprocessed_choices[1];
-					
+
 					switch (command) {
 						case 'l': // polictics
 							this.setClientStateAction('client_selectRoleCard', _('Select a role card to gain'));
@@ -1892,7 +1894,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							if ($(mydeck_counter).innerHTML == 0) {
 								mydeck = "discard_" + this.player_color;
 							}
-									
+
 							this.setClientStateCustom('client_reconDeck', _('RECON your Deck (select a top card)'), [], {
 								onUpdateActionButtons: (args) => {
 									this.revealLocation(mydeck, true);
@@ -1910,7 +1912,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 									return false;
 								}
 							});
-							
+
 							break;
 						case 'T':
 							this.setClientStateCustom('clSelectTech', _('Select Technology'), [], {
@@ -1970,7 +1972,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 									this.setClientStateCustom('client_selectShipToPay', _('Select a ship or discard a card to pay cost'), {
 										selectionList: payment_token,
 										buthandler: (node_id) => {
-								
+
 											var icons = this.getRulesFor(node_id, 'i');
 											var icons_count = 0;
 
@@ -2012,7 +2014,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 										onCard: (id) => {
 											if (!this.checkActivePlayer()) return true;
 											if (!this.checkActiveSlot(id)) return true;
-											
+
 											this.gamedatas.gamestate.args.buthandler(id);
 											return true;
 										}
@@ -2028,7 +2030,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							var card_name = this.getTokenName(this.gamedatas.gamestate.args.card);
 							if (lookup !== 'q') message = _('${you} must choose a planet to keep for ${card_name} (last one)');
 							else message = _('${you} must choose a planet to keep for ${card_name}');
-							this.setClientStateCustom('clSelectPlanetToKeep', message , {
+							this.setClientStateCustom('clSelectPlanetToKeep', message, {
 								card_name: card_name
 							}, {
 								onUpdateActionButtons: (args) => {
@@ -2104,7 +2106,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							return true; // submit
 						case 'x':// skip
 							return this.commitOperationAndAction(command);
-						
+
 						case 'i': // gain inf
 						case 'R': // reaseach icon
 						case 'd': // draw
@@ -2120,14 +2122,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					return false;
 				},
-				getRoleCard: function(type) {
+				getRoleCard: function (type) {
 					var nodes = dojo.query(".board .card_role_" + type);
 					if (nodes.length > 0) return nodes[0].id;
 					else
 						return "x_" + type + "_bottom";//x_research_bottom
 				},
 
-				getRulesFor: function(card_id, field) {
+				getRulesFor: function (card_id, field) {
 					if (field == undefined) field = 'r';
 					var key = card_id;
 					while (key) {
@@ -2148,7 +2150,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					return rule;
 				},
 
-				getCostRule: function(card_id) {
+				getCostRule: function (card_id) {
 					var rcost = this.getRulesFor(card_id, 'b');
 					var mcost = this.getRulesFor(card_id, 'bm');
 					var rcoststr = this.strRepeat('R', rcost);
@@ -2163,7 +2165,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 				},
 
-				updateMyCountersAll: function() {
+				updateMyCountersAll: function () {
 					// console.log("updating counters");
 					// var type = ".card:not(.card_bottom)";
 					// this.updateLocalCounter('supply_survey', type);
@@ -2178,7 +2180,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					//	this.updateLocalCounter('tableau_fighter_' + playerInfo.color, '.fighter:not(.counter)');
 					//}
 				},
-				updatePermCounters: function(color, perm_boost_num) {
+				updatePermCounters: function (color, perm_boost_num) {
 					var role_icons = this.gamedatas.materials.role_icons;
 					for (var i in role_icons) {
 						var x = role_icons[i];
@@ -2187,7 +2189,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						if ($(counter)) $(counter).innerHTML = perm_boost_count;
 					}
 				},
-				updateLocalCounter: function(location, childtype) {
+				updateLocalCounter: function (location, childtype) {
 					var query = dojo.query("#" + location + ' ' + childtype);
 					var counter = location + '_counter';
 					//console.log("** LOCAL counter " + counter + " -> " + query.length);
@@ -2195,7 +2197,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					else
 						console.error("Cannot find counter " + counter);
 				},
-				expandTech: function(state, query, loc) {
+				expandTech: function (state, query, loc) {
 					console.log("expand tech " + state);
 					if (typeof query == 'undefined') {
 						query = ".supply_tech .tech";
@@ -2211,7 +2213,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						} else {
 							dojo.place('selection_area_controls', 'selection_area', 'first');
 						}
-				
+
 						var queryres = dojo.query(query);
 						queryres.forEach((elt, i) => {
 							// console.log("expand tech " + elt.id);
@@ -2235,13 +2237,13 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							dojo.query(query).forEach((elt, i) => {
 								// console.log("expand tech " + elt.id);
 								var info = this.getTokenDisplayInfo(elt.id);
-		
+
 								if (info.side != 2) return;// ??? should not happen
 								var rloc = loc;
 								var relation = undefined;
-		
+
 								var flip = info.flip;
-						
+
 								var flipNode = $(flip);
 								if (flipNode && flipNode.parentNode.id.startsWith(loc)) {
 									rloc = flip;
@@ -2255,11 +2257,11 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							);
 						}, queryres.length * 2 + 100);
 
-						setTimeout(() => this.updateFilters(), queryres.length * 2 +600);
+						setTimeout(() => this.updateFilters(), queryres.length * 2 + 600);
 					} else {
 						dojo.place('selection_area_controls', 'selection_area', 'first');
-		
-						
+
+						console.log({ loc });
 						if (loc == 'discard_display') {
 							queryFold = ".discard_display  .card";
 							queryUnexpand = ".discard_display";
@@ -2269,6 +2271,9 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						} else if (loc == 'planets_display') {
 							queryFold = ".planets_display  .card";
 							queryUnexpand = ".planets_display";
+						} else if (loc == 'tech_display') {
+							queryFold = ".tech_display .card";
+							queryUnexpand = ".inspect_display";
 						} else {
 							queryFold = ".common_space  .tech,.selection_area .tech,.inspect_display  .card";
 							queryUnexpand = ".inspect_display";
@@ -2276,7 +2281,6 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 
 						dojo.query(queryFold).forEach(
 							(elt) => {
-								// console.log("expand tech " + elt.id);
 								this.removeTooltip(elt.id);
 								this.placeToken(elt.id);
 							});
@@ -2284,7 +2288,28 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						dojo.query(queryUnexpand).removeClass('expanded');
 					}
 				},
-				playAction: function(card_id, rules) {
+				expandScenario: function () {
+					console.log("expand scenario");
+					query = ".scenario";
+					loc = "selection_area"
+					
+					dojo.addClass('selection_area_controls', 'hidden')
+					dojo.addClass(loc, 'expanded');
+					var queryres = dojo.query(query);
+					queryres.forEach((elt, i) => {
+						var info = this.getTokenDisplayInfo(elt.id);
+						console.log({ elt, info })
+						if (info.side == 2) {
+							return;
+						}
+						var rloc = loc;
+
+						this.slideToObjectRelative(elt.id, rloc, 500, i * 2, (node) => {
+							this.updateTooltip(node.id);
+						});
+					});
+				},
+				playAction: function (card_id, rules) {
 					if (rules === undefined)
 						rules = this.getRulesFor(card_id, 'a');
 					this.clientStateArgs.card = card_id;
@@ -2308,7 +2333,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				 * Most of the time, these methods: _ check the action is possible at this game state. _ make a call to the game server
 				 * 
 				 */
-				onCard: function(event) {
+				onCard: function (event) {
 					var id = event.currentTarget.id;
 					dojo.stopEvent(event);
 					console.log("on slot " + id);
@@ -2358,7 +2383,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					switch (this.getStateName()) {
 						case 'playerTurnDiscard':
 						case 'playerTurnPreDiscard':
-						
+
 							checkActive = false;
 							break;
 						case 'client_selectResourceToTrade':
@@ -2418,14 +2443,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								dojo.addClass(card_id, 'selected');
 								dojo.removeClass(card_id, 'active_slot');
 							}
-							var divpick = dojo.query(".hand .card.selected").map(function(node) {
+							var divpick = dojo.query(".hand .card.selected").map(function (node) {
 								return node.id;
 							}).join(" ");
 							this.clientStateArgs.boost = divpick;
 							return;
 						case 'client_selectTechCard':
 							if (this.commitOperation('R', card_id)) {
-								dojo.removeClass(card_id,'active_slot');
+								dojo.removeClass(card_id, 'active_slot');
 								this.placeTokenLocal(card_id, 'setaside_' + this.player_color, 1);
 								this.expandTech(false);
 								var crule = this.getCostRule(card_id);
@@ -2746,7 +2771,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				},
 
 
-				onExecuteRole: function(event) {
+				onExecuteRole: function (event) {
 					var id = this.onClickSanity(event, false);
 					if (id == null) return;
 					var total = getIntPart(id, 1);
@@ -2792,7 +2817,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							var args = this.gamedatas.gamestate.args;
 							var total = args.perm_boost_count + args.hand_boost_count;
 							var message = _('SURVEY: Draw ${look} planets - keep ${keep} (unused boost ${remaining_boost})');
-						
+
 							if (leader) total++;
 							var look = total - 1;
 							var keep = 1;
@@ -2816,8 +2841,8 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 								remaining_boost: args.possible_boost
 							});
 
-							this.setClientStateAction('client_confirm',text);
-	
+							this.setClientStateAction('client_confirm', text);
+
 							break;
 						case 'P':
 							var args = this.gamedatas.gamestate.args;
@@ -2863,14 +2888,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 							break;
 					}
 				},
-				onDeck: function(event) {
+				onDeck: function (event) {
 					var id = event.currentTarget.id;
 					dojo.stopEvent(event);
 					console.log("on slot " + id);
 					if (id == null || this.isSpectator) return;
 					this.revealLocation(id);
 				},
-				onDiscard: function(event) {
+				onDiscard: function (event) {
 					var id = event.currentTarget.id;
 					dojo.stopEvent(event);
 					console.log("on slot " + id);
@@ -2878,7 +2903,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					this.revealLocation(id);
 				},
 
-				revealLocation: function(id, activate) {
+				revealLocation: function (id, activate) {
 					var location = 'discard_display';
 					if (id == 'discard_planets' || id == 'planets_display' || id == 'supply_planets') {
 						location = 'planets_display';
@@ -2895,7 +2920,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						return;
 					}
 					var self = this;
-					func = function(result) {
+					func = function (result) {
 						console.log(result);
 						if (result.data && result.data.contents) {
 							if (result.data.length > 0) {
@@ -2917,7 +2942,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					this.ajaxAction(action, args, func);
 
 				},
-				onResource: function(event) {
+				onResource: function (event) {
 					var id = this.onClickSanity(event, true);
 					if (id == null) return;
 					var resource = id;
@@ -2946,7 +2971,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					this.showMoveUnauthorized();
 				},
 
-				onFighter: function(event) {
+				onFighter: function (event) {
 					var id = this.onClickSanity(event, false);
 					if (id == null) return;
 
@@ -2998,13 +3023,13 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					}
 					this.showMoveUnauthorized();
 				},
-				onSlider: function(event) {
+				onSlider: function (event) {
 					var id = event.currentTarget.id;
 					dojo.stopEvent(event);
 					var sliderId = id;
 					this.onSliderChange(sliderId);
 				},
-				onSliderChange: function(sliderId) {
+				onSliderChange: function (sliderId) {
 					var slider_value = $(sliderId).value;
 					var output = document.getElementById(sliderId + "_value");
 					output.innerHTML = slider_value;
@@ -3022,12 +3047,12 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						}
 					this.updateFilters();
 				},
-				onCheckbox: function(event) {
+				onCheckbox: function (event) {
 					//var id = event.currentTarget.id;
 					dojo.stopEvent(event);
 					this.updateFilters();
 				},
-				updateFilters: function() {
+				updateFilters: function () {
 					var hide_opacity = 0.3;
 					dojo.query(".filter_control_area .card").forEach((node) => {
 						dojo.style(node, "opacity", 1);
@@ -3081,7 +3106,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				 * Note: game notification names correspond to "notifyAllPlayers" and "notifyPlayer" calls in your eminentdomainxmakina.game.php file.
 				 * 
 				 */
-				setupNotifications: function() {
+				setupNotifications: function () {
 					console.log('notifications subscriptions setup enminent');
 					this.inherited(arguments);
 				},

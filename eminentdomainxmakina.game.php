@@ -16,8 +16,12 @@
  * In this PHP file, you are going to defines the rules of the game.
  *
  */
+
+use EminentDomain\Setup;
+
 require_once(APP_GAMEMODULE_PATH . 'module/table/table.game.php');
 require_once('modules/EuroGame.php');
+require_once('modules/php/EminentDomain/index.php');
 define("CARD_STATE_PERMANENT_TAPPED", 0);
 define("CARD_STATE_PERMANENT", 1);
 
@@ -99,6 +103,10 @@ class EminentDomainXmakina extends EuroGame
         return $this->getGameStateValue('escalation_variant') == 2;
     }
 
+    function isScenarioSelection(){
+        return $this->getGameStateValue('scenario_selection') == 2;
+    }
+
     /*
      * setupNewGame:
      *
@@ -120,11 +128,6 @@ class EminentDomainXmakina extends EuroGame
             $this->setGameStateValue('end_of_game', 0);
             $this->setGameStateValue('logistics_at_end', 0);
             $this->setGameStateValue('extra_turn_at_end', 0);
-            // begging of the turn for active player
-            $player_id = $this->getActivePlayerId();
-            $this->saction_TurnReplenish($player_id);
-            $this->incStat(1, 'turns_number', $player_id);
-            $this->incStat(1, 'turns_number');
         } catch (Exception $e) {
             // logging does not actually work in game init :(
             $this->error("Fatal error while creating game");
@@ -156,49 +159,23 @@ class EminentDomainXmakina extends EuroGame
 
     function initTables()
     {
-        //srand(null);// XXX!
-        $players = $this->loadPlayersBasicInfos();
         $num = $this->getPlayersNumber();
         $learning_variant = $this->getGameStateValue('learning_variant') == 2;
         $extended_variant = $this->getGameStateValue('extended_variant') == 2 && $num == 3;
-        $scenarios_variant = $this->getGameStateValue('scenarios_variant') == 2;
-        $scenario_selection = $this->getGameStateValue('scenario_selection') === 2;
         $escalation_variant = $this->isEscalationVariant();
         // setup from expansion rules
-        $setupnums = [];
-        switch ($num) {
-            case 2:
-                $setupnums = [16, 14, 16, 12, 16];
-                break;
-            case 3:
-                if ($extended_variant)
-                    $setupnums = [18, 15, 18, 14, 18];
-                else
-                    $setupnums = [20, 16, 20, 16, 20];
-                break;
-            case 4:
-                $setupnums = [20, 16, 20, 16, 20];
-                break;
-            case 5:
-                $setupnums = [24, 20, 24, 20, 24];
-                break;
-            default:
-                $this->warn("bad number of players: $num");
-                $setupnums = [16, 14, 16, 12, 16];
-                break;
-        }
-        $maxvp = 24;
-        if ($num == 5)
-            $maxvp = 32;
+        $setupnums = Setup::BuildDecks($num, $extended_variant);
+        $maxvp = Setup::GetMaxVP($num);
         $this->tokens->createTokensPack("vp_w_{INDEX}", "stock_vp", $maxvp);
         $this->tokens->createTokensPack("card_role_survey_{INDEX}", "supply_survey", $setupnums[0]);
         $this->tokens->createTokensPack("card_role_warfare_{INDEX}", "supply_warfare", $setupnums[1]);
         $this->tokens->createTokensPack("card_role_colonize_{INDEX}", "supply_colonize", $setupnums[2]);
         $this->tokens->createTokensPack("card_role_produce_{INDEX}", "supply_produce", $setupnums[3]);
-        if (!$learning_variant)
+        if (!$learning_variant) {
             $this->tokens->createTokensPack("card_role_research_{INDEX}", "supply_research", $setupnums[4]);
-        $this->tokens->createTokensPack("card_planet_0_{INDEX}", "supply_planets", 6);
-        $this->tokens->shuffle("supply_planets");
+        }
+        $this->tokens->createTokensPack("card_planet_0_{INDEX}", "starting_worlds", 6);
+        $this->tokens->shuffle("starting_worlds");
         if ($escalation_variant) {
             $this->tokens->createTokensPack('card_fleet_b_{INDEX}', "dev_null", $num);
             $this->tokens->createTokensPack('card_fleet_i_{INDEX}', "supply_fleet", $num);
@@ -230,6 +207,21 @@ class EminentDomainXmakina extends EuroGame
         $this->tokens->createTokensPack('resource_f_{INDEX}', "stock_resource", 6, 0);
         $this->tokens->createTokensPack('resource_i_{INDEX}', "stock_resource", 6, 0);
         $this->tokens->createTokensPack('resource_s_{INDEX}', "stock_resource", 6, 0);
+
+        // Populate all game components
+        $this->tokens->createTokensPack("card_planet_1_{INDEX}", "supply_planets", 9);
+        $this->tokens->createTokensPack("card_planet_2_{INDEX}", "supply_planets", 9);
+        $this->tokens->createTokensPack("card_planet_3_{INDEX}", "supply_planets", 9);
+        if ($escalation_variant) {
+            $this->tokens->createTokensPack("card_planet_E_{INDEX}", "supply_planets", 15, 1);
+        }
+        $this->tokens->shuffle("supply_planets");
+        if ($learning_variant) {
+            $this->tokens->moveToken("card_planet_1_1", "dev_null");
+            $this->tokens->moveToken("card_planet_1_2", "dev_null");
+            $this->tokens->moveToken("card_planet_1_3", "dev_null");
+        }
+
         // SCENARIOS
         $this->scenarioProcess();
         $scenario_tokens = [];
@@ -246,7 +238,16 @@ class EminentDomainXmakina extends EuroGame
             }
         }
         $this->tokens->createTokens($scenario_tokens, "scenarios", 0);
-        $this->tokens->shuffle("scenarios");
+    }
+
+    private function setupPlayers()
+    {
+        $players = $this->loadPlayersBasicInfos();
+        $learning_variant = $this->getGameStateValue('learning_variant') == 2;
+        $scenarios_variant = $this->getGameStateValue('scenarios_variant') == 2;
+        $scenario_selection = $this->isScenarioSelection();
+        $escalation_variant = $this->isEscalationVariant();
+
         $standard_setup = [2, 1, 2, 2, 2, 1, '', ''];
         $poli = 1;
         $scenarios_setup = [];
@@ -256,7 +257,13 @@ class EminentDomainXmakina extends EuroGame
             if ($escalation_variant)
                 $this->tokens->moveToken("card_fleet_b_${no}", "tableau_${color}", 1);
             if ($scenarios_variant) {
-                $sc = $this->tokens->pickTokensForLocation(1, "scenarios", "tableau_${color}", 1);
+                if(!$scenario_selection){
+                    $this->tokens->shuffle("scenarios");
+                    $sc = $this->tokens->pickTokensForLocation(1, "scenarios", "tableau_$color", 1);
+                } else {
+                    $sc = $this->tokens->getTokenOfTypeInLocation('scenario', "tableau_$color");
+                }
+
                 $key = $sc[0]['key'];
                 $scenarios_setup[$player_id] = $this->token_types[$key]['setup'];
                 $conflicts = $this->token_types[$key]['conflict'];
@@ -324,22 +331,12 @@ class EminentDomainXmakina extends EuroGame
             $setup = $scenarios_setup[$player_id];
             $desi_planet = $setup[6];
             if (!$desi_planet) { // if not special planet 
-                $this->tokens->pickTokensForLocation(1, "supply_planets", "tableau_${color}", 0);
+                $this->tokens->pickTokensForLocation(1, "starting_worlds", "tableau_${color}", 0);
             }
         }
-        $this->tokens->moveAllTokensInLocation("supply_planets", "dev_null");
+        // move to dev_null to remove from the game
+        $this->tokens->moveAllTokensInLocation("starting_worlds", "dev_null");
         $this->tokens->moveAllTokensInLocation("scenarios", "dev_null");
-        $this->tokens->createTokensPack("card_planet_1_{INDEX}", "supply_planets", 9);
-        $this->tokens->createTokensPack("card_planet_2_{INDEX}", "supply_planets", 9);
-        $this->tokens->createTokensPack("card_planet_3_{INDEX}", "supply_planets", 9);
-        if ($escalation_variant)
-            $this->tokens->createTokensPack("card_planet_E_{INDEX}", "supply_planets", 15, 1);
-        $this->tokens->shuffle("supply_planets");
-        if ($learning_variant) {
-            $this->tokens->moveToken("card_planet_1_1", "dev_null");
-            $this->tokens->moveToken("card_planet_1_2", "dev_null");
-            $this->tokens->moveToken("card_planet_1_3", "dev_null");
-        }
     }
 
     /*
@@ -633,15 +630,15 @@ class EminentDomainXmakina extends EuroGame
         foreach ($this->token_types as $id => &$info) {
             $rowtype = $info['type'];
             if (startsWith($rowtype, 'scenario')) {
-                for ($i = 6; $i <= 9; $i++) {
+                for ($i = 6; $i <= 9; $i++) { // Starting world + up to 2 starting techs (this is why we can't have Double Time scenario)
                     if (!isset($info['setup'][$i]))
                         continue;
                     $v = $info['setup'][$i];
                     if ($v == 'random') {
-                        $info['setup'][$i] = '';
+                        $info['setup'][$i] = ''; // a '' world is random
                     } else {
                         $v = $this->mtGet($v);
-                        $info['setup'][$i] = $v;
+                        $info['setup'][$i] = $v; // get the ID from the world/tech name
                     }
                 }
             }
@@ -650,7 +647,7 @@ class EminentDomainXmakina extends EuroGame
             $rowtype = $info['type'];
             if (startsWith($rowtype, 'scenario')) {
                 $info['conflict'] = [];
-                for ($i = 6; $i <= 9; $i++) {
+                for ($i = 6; $i <= 9; $i++) { // Starting world + up to 2 starting techs
                     if (!isset($info['setup'][$i]))
                         continue;
                     $v = $info['setup'][$i];
@@ -3444,6 +3441,26 @@ class EminentDomainXmakina extends EuroGame
             return 2;
         }
         return 0;
+    }
+
+    function st_gameScenarioSelection()
+    {
+        $scenario_selection = $this->isScenarioSelection();
+
+        if (!$scenario_selection) {
+            $this->setupPlayers();
+            // begging of the turn for active player
+            $player_id = $this->getActivePlayerId();
+            $this->saction_TurnReplenish($player_id);
+            $this->incStat(1, 'turns_number', $player_id);
+            $this->incStat(1, 'turns_number');
+
+            $this->gamestate->nextState('last');
+            return;
+        }
+
+        $this->dbSetPlayerMultiactive(-1, 1); // all active
+        $this->gamestate->nextState('next');
     }
 
     function st_gameTurnNextPlayerFollow()
