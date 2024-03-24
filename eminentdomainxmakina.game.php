@@ -74,6 +74,7 @@ class EminentDomainXmakina extends EuroGame {
                 "scenarios_variant" => 102, //
                 "extra_turn_variant" => 103, //
                 "escalation_variant" => 104, // 
+                "scenario_selection" => 105, // 
         ));
         $this->tokens->autoreshuffle_custom = array ('supply_planets' => 'discard_planets' );
         $this->tokens->autoreshuffle = true;
