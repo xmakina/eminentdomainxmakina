@@ -2261,7 +2261,6 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 					} else {
 						dojo.place('selection_area_controls', 'selection_area', 'first');
 
-						console.log({ loc });
 						if (loc == 'discard_display') {
 							queryFold = ".discard_display  .card";
 							queryUnexpand = ".discard_display";
@@ -2290,15 +2289,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 				},
 				expandScenario: function () {
 					console.log("expand scenario");
-					query = ".scenario";
+					query = "#scenarios .scenario";
 					loc = "selection_area"
-					
+
 					dojo.addClass('selection_area_controls', 'hidden')
 					dojo.addClass(loc, 'expanded');
 					var queryres = dojo.query(query);
 					queryres.forEach((elt, i) => {
 						var info = this.getTokenDisplayInfo(elt.id);
-						console.log({ elt, info })
 						if (info.side == 2) {
 							return;
 						}
@@ -2307,7 +2305,22 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						this.slideToObjectRelative(elt.id, rloc, 500, i * 2, (node) => {
 							this.updateTooltip(node.id);
 						});
+
+						this.connectClass(elt.id, 'onclick', 'onCard');
+						dojo.addClass(elt.id, 'clickable');
 					});
+				},
+				onCard_scenarioSelection: function (card_id) {
+					const beginsWith = card_id.substring(0, 8);
+					if (beginsWith !== "scenario") {
+						return false;
+					}
+
+					this.clientStateArgs.card = card_id;
+					this.clientStateArgs.action = 'selectScenario';
+					this.clientStateArgs.unprocessed_choices = '';
+					this.actionPromptAndCommit();
+					return true;
 				},
 				playAction: function (card_id, rules) {
 					if (rules === undefined)
@@ -2767,6 +2780,8 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 
 							return;
 					}
+
+					console.log('no actions found');
 					this.showMoveUnauthorized();
 				},
 

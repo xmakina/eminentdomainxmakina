@@ -75,6 +75,7 @@ class EminentDomainXmakina extends EuroGame
             "role_phases_played" => 29, //
             "discard_played" => 30, //
             "follow_played" => 31, //
+            "scenarios" => 32, //
             // variants
             "learning_variant" => 100, //
             "extended_variant" => 101, //
@@ -103,7 +104,13 @@ class EminentDomainXmakina extends EuroGame
         return $this->getGameStateValue('escalation_variant') == 2;
     }
 
-    function isScenarioSelection(){
+    function isScenarioVariant()
+    {
+        return $this->getGameStateValue('scenarios_variant') == 2;
+    }
+
+    function isScenarioSelection()
+    {
         return $this->getGameStateValue('scenario_selection') == 2;
     }
 
@@ -237,6 +244,7 @@ class EminentDomainXmakina extends EuroGame
                 }
             }
         }
+        
         $this->tokens->createTokens($scenario_tokens, "scenarios", 0);
     }
 
@@ -244,8 +252,7 @@ class EminentDomainXmakina extends EuroGame
     {
         $players = $this->loadPlayersBasicInfos();
         $learning_variant = $this->getGameStateValue('learning_variant') == 2;
-        $scenarios_variant = $this->getGameStateValue('scenarios_variant') == 2;
-        $scenario_selection = $this->isScenarioSelection();
+        $scenarios_variant = $this->isScenarioVariant();
         $escalation_variant = $this->isEscalationVariant();
 
         $standard_setup = [2, 1, 2, 2, 2, 1, '', ''];
@@ -254,23 +261,13 @@ class EminentDomainXmakina extends EuroGame
         foreach ($players as $player_id => $player_info) {
             $color = $player_info['player_color'];
             $no = $player_info['player_no'];
-            if ($escalation_variant)
-                $this->tokens->moveToken("card_fleet_b_${no}", "tableau_${color}", 1);
+            if ($escalation_variant) {
+                $this->tokens->moveToken("card_fleet_b_$no", "tableau_$color", 1);
+            }
             if ($scenarios_variant) {
-                if(!$scenario_selection){
-                    $this->tokens->shuffle("scenarios");
-                    $sc = $this->tokens->pickTokensForLocation(1, "scenarios", "tableau_$color", 1);
-                } else {
-                    $sc = $this->tokens->getTokenOfTypeInLocation('scenario', "tableau_$color");
-                }
-
-                $key = $sc[0]['key'];
+                $sc = $this->tokens->getTokenOfTypeInLocation('scenario', "tableau_$color");
+                $key = $sc['key'];
                 $scenarios_setup[$player_id] = $this->token_types[$key]['setup'];
-                $conflicts = $this->token_types[$key]['conflict'];
-                // remove conflicting scenarios
-                foreach ($conflicts as $confKey) {
-                    $this->tokens->moveToken($confKey, 'dev_null');
-                }
             } else {
                 $scenarios_setup[$player_id] = $standard_setup;
             }
@@ -3443,24 +3440,74 @@ class EminentDomainXmakina extends EuroGame
         return 0;
     }
 
-    function st_gameScenarioSelection()
+    function st_selectScenario()
     {
-        $scenario_selection = $this->isScenarioSelection();
-
-        if (!$scenario_selection) {
-            $this->setupPlayers();
-            // begging of the turn for active player
-            $player_id = $this->getActivePlayerId();
-            $this->saction_TurnReplenish($player_id);
-            $this->incStat(1, 'turns_number', $player_id);
-            $this->incStat(1, 'turns_number');
-
+        $scenarios = $this->isScenarioVariant();
+        if (!$scenarios) {
             $this->gamestate->nextState('last');
             return;
         }
 
-        $this->dbSetPlayerMultiactive(-1, 1); // all active
-        $this->gamestate->nextState('next');
+        $selectScenarioVariant = $this->isScenarioSelection();
+        if (!$selectScenarioVariant) {
+            $this->tokens->shuffle("scenarios");
+            $players = $this->loadPlayersBasicInfos();
+            foreach ($players as $player_info) {
+                $color = $player_info['player_color'];
+                $this->tokens->pickTokensForLocation(1, "scenarios", "tableau_$color", 1);
+            }
+            $this->gamestate->nextState('last');
+        }
+    }
+
+    function st_scenarioNextPlayer()
+    {
+        $player_id = $this->getActivePlayerId();
+        $next_player_id = $this->getPlayerAfter($player_id);
+        if ($next_player_id === $this->getFirstPlayer()) {
+            $this->gamestate->nextState('last');
+        } else {
+            $this->activeNextPlayer();
+            $this->gamestate->nextState('nextPlayer');
+        }
+    }
+
+    function action_selectScenario($card)
+    {
+        self::checkAction('selectScenario');
+        $player_id = $this->getCurrentPlayerId();
+        $color = $this->getPlayerColor($player_id);
+        // $check card
+        $tokens = $this->tokens->getTokensOfTypeInLocation("scenario", "scenarios");
+        $this->systemAssertTrue("Bad card for pick", array_key_exists($card, $tokens));
+        $this->dbSetTokenLocation($card, "tableau_$color", 1, clienttranslate('${player_name} picked ${token_name}'));
+        
+        $sc = $this->tokens->getTokenOfTypeInLocation('scenario', "tableau_$color");
+        $key = $sc['key'];
+        
+        // apply the scenario information
+        $this->scenarioProcess();
+
+        $token = $this->token_types[$key];
+        $conflicts = $token['conflict'];
+        // remove conflicting scenarios
+        foreach ($conflicts as $confKey) {
+            $this->tokens->moveToken($confKey, 'dev_null');
+        }
+
+        $this->gamestate->nextState('');
+    }
+
+    function st_gamePlayerSetup()
+    {
+        $this->setupPlayers();
+        // begging of the turn for active player
+        $player_id = $this->getActivePlayerId();
+        $this->saction_TurnReplenish($player_id);
+        $this->incStat(1, 'turns_number', $player_id);
+        $this->incStat(1, 'turns_number');
+
+        $this->gamestate->nextState('');
     }
 
     function st_gameTurnNextPlayerFollow()

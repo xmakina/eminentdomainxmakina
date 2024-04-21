@@ -1991,6 +1991,10 @@ color: #773300;
 	display: none;
 }
 
+.clickable {
+	cursor: pointer;
+}
+
 .hidden {
 	display: none !important;
 }

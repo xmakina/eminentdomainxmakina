@@ -67,6 +67,7 @@ if (!defined('STATE_END_GAME')) { // guard since this included multiple times
         define("STATE_PLAYER_TURN_ACTION_EXTRA", 22); // extra data collection for action 
         define("STATE_SCENARIO_SELECTION", 23);
         define("STATE_SCENARIO_SELECTION_NEXT_PLAYER", 24);
+        define("STATE_GAME_PLAYER_SETUP", 25);
         define("STATE_END_GAME", 99);
 }
 
@@ -79,30 +80,36 @@ $machinestates = array(
                 "description" => "",
                 "type" => "manager",
                 "action" => "stGameSetup",
-                "transitions" => array("" => STATE_SCENARIO_SELECTION_NEXT_PLAYER)
-        ),
-
-        STATE_SCENARIO_SELECTION_NEXT_PLAYER => array(
-                "name" => "gameScenarioSelection",
-                "description" => '',
-                "type" => "game",
-                "action" => "st_gameScenarioSelection",
-                "updateGameProgression" => false,
-                "transitions" => array(
-                        "next" => STATE_SCENARIO_SELECTION,
-                        "loopback" =>  STATE_SCENARIO_SELECTION_NEXT_PLAYER,
-                        "last" => STATE_PLAYER_TURN_ACTION,
-                ),
+                "transitions" => array("" => STATE_SCENARIO_SELECTION)
         ),
         STATE_SCENARIO_SELECTION => array(
                 "name" => "scenarioSelection",
-                "type" => "multipleactiveplayer",
+                "action" => "st_selectScenario",
+                "type" => "activeplayer",
                 "description" => clienttranslate('Other players must choose a scenario'),
                 "descriptionmyturn" => clienttranslate('${you} must choose to a scenario'),
-                "possibleactions" => array("chooseScenario"),
+                "possibleactions" => array("selectScenario"),
                 "transitions" => array(
-                        "next" => STATE_SCENARIO_SELECTION_NEXT_PLAYER,
+                        "" => STATE_SCENARIO_SELECTION_NEXT_PLAYER
                 )
+        ),
+        STATE_SCENARIO_SELECTION_NEXT_PLAYER => array(
+                "name" => "nextPlayer",
+                "description" => "",
+                "type" => "game",
+                "action" => "st_scenarioNextPlayer",
+                "transitions" => array(
+                        "nextPlayer" => STATE_SCENARIO_SELECTION,
+                        "last" => STATE_GAME_PLAYER_SETUP
+                )
+        ),
+        STATE_GAME_PLAYER_SETUP => array(
+                "name" => "gamePlayerSetup",
+                "description" => '',
+                "type" => "game",
+                "action" => "st_gamePlayerSetup",
+                "updateGameProgression" => false,
+                "transitions" => array("" => STATE_PLAYER_TURN_ACTION)
         ),
 
         // Note: ID=2 => your first state
