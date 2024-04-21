@@ -244,7 +244,7 @@ class EminentDomainXmakina extends EuroGame
                 }
             }
         }
-        
+
         $this->tokens->createTokens($scenario_tokens, "scenarios", 0);
     }
 
@@ -3481,10 +3481,10 @@ class EminentDomainXmakina extends EuroGame
         $tokens = $this->tokens->getTokensOfTypeInLocation("scenario", "scenarios");
         $this->systemAssertTrue("Bad card for pick", array_key_exists($card, $tokens));
         $this->dbSetTokenLocation($card, "tableau_$color", 1, clienttranslate('${player_name} picked ${token_name}'));
-        
+
         $sc = $this->tokens->getTokenOfTypeInLocation('scenario', "tableau_$color");
         $key = $sc['key'];
-        
+
         // apply the scenario information
         $this->scenarioProcess();
 
@@ -3492,7 +3492,11 @@ class EminentDomainXmakina extends EuroGame
         $conflicts = $token['conflict'];
         // remove conflicting scenarios
         foreach ($conflicts as $confKey) {
-            $this->tokens->moveToken($confKey, 'dev_null');
+            // Conflicts will include all expansions, even if not active
+            $tokenExists = $this->tokens->getTokenLocation($confKey) !== null;
+            if ($tokenExists) {
+                $this->dbSetTokenLocation($confKey, 'dev_null', null, clienttranslate('${token_name} can no longer be selected'));
+            }
         }
 
         $this->gamestate->nextState('');

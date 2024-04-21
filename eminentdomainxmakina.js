@@ -214,7 +214,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 						switch (stateName) {
 							case 'scenarioSelection':
 								this.clientStateArgs.action = 'selectScenario';
-								this.expandScenario();
+								if (this.isCurrentPlayerActive()) {
+									this.expandScenario();
+								} else {
+									this.hideScenario();
+								}
+								break;
+							case 'gamePlayerSetup':
+								location.reload();
 								break;
 							case 'playerTurnAction':
 								this.clientStateArgs.action = 'playAction';
@@ -2286,6 +2293,9 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter",
 
 						dojo.query(queryUnexpand).removeClass('expanded');
 					}
+				},
+				hideScenario: function () {
+					dojo.query("#selection_area .scenario").forEach((elt) => dojo.addClass(elt, "hidden"));
 				},
 				expandScenario: function () {
 					console.log("expand scenario");

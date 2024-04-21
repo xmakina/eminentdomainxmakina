@@ -299,7 +299,7 @@
 				</div>
 
 				<div id="scenarios"
-					class="slot slot_board slot_tooltip">
+					class="supply_hidden">
 				</div>
 
 				<div id="limbo" class="supply_hidden"></div>
